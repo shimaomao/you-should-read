@@ -167,7 +167,7 @@ class Medias:
             # # stronger smoothing and dupes (ara is more centroid)
             # item.apply(arc, ara)
 
-    def score(self):
+    def score(self, out_prefix='std'):
         print('{:37} | Num | Avge. | Bayes | B Off | Norm. | N Off'.format(
             'Item'))
         print('{:37} | --- | ----- | ----- | ----- | ----- | -----'.format(
@@ -186,7 +186,37 @@ class Medias:
                     media.name, media.rating_count, avg, media.computed,
                     bayes_offset, media.computed_computed, normal_offset))
 
+        with open('{}.std.txt'.format(out_prefix), 'w') as f:
+            f.write('{:37} | Rating\n'.format('Item'))
+            for media in medias:
+                f.write('{:37} | {:<6}\n'.format(media.name, round(media.rating_average, 4)))
+
+        with open('{}.computed.txt'.format(out_prefix), 'w') as f:
+            f.write('{:37} | Rating\n'.format('Item'))
+            for media in medias_by_c:
+                f.write('{:37} | {:<6}\n'.format(media.name, round(media.computed, 4)))
+
+        with open('{}.computed_from_computed.txt'.format(out_prefix), 'w') as f:
+            f.write('{:37} | Rating\n'.format('Item'))
+            for media in medias_by_cc:
+                f.write('{:37} | {:<6}\n'.format(media.name, round(media.computed_computed, 4)))
+
         print()
+
+    def show(self):
+        print('{:37} | Avge.    |    {:37} | Avge.'.format('Item', 'Item'))
+        print('{:37} | -----    |    {:37} | -----'.format('-' * 37, '-' * 37))
+
+        medias = list(sorted(self.medias, key=lambda x: -x.rating_average))
+        medias_sort = list(sorted(medias, key=lambda x: -x.computed_computed))
+        # stable sort
+        medias = list(sorted(medias_sort, key=lambda x: -x.rating_average))
+
+        for lhs, rhs in zip(medias, medias_sort):
+            avg = round(lhs.rating_average, 3)
+            avg_sort = round(rhs.computed_computed, 3)
+            print('{:37} | {:<5}    |    {:37} | {:<5}'.format(
+                lhs.name, avg, rhs.name, avg_sort))
 
 
 class Rating:
@@ -208,6 +238,7 @@ class Ratings:
         conn = await asyncpg.connect(host='localhost', user='postgres',
                                      database='postgres')
         ratings = await conn.fetch('SELECT uid, mid, value FROM ysr.rating')
+
         return Ratings([Rating(a, b, c) for a, b, c in ratings])
 
     def for_mid(self, mid):
@@ -280,15 +311,16 @@ async def main():
     ratings = await Ratings.create()
     medias = await Medias.create(ratings)
 
-    # TODO: normalize less when rating is closer to avg media rating?
     ratings.apply()
-    ratings.score()
+    # ratings.score()
 
     medias.apply()
-    medias.score()
+    # medias.score()
 
     medias.apply_computed()
-    medias.score()
+    # medias.score(out_prefix='computed')
+
+    medias.show()
 
 
 if __name__ == '__main__':
