@@ -1,11 +1,13 @@
 BEGIN;
 
+DELETE FROM ysr.user;
 INSERT INTO ysr.user (id, name) VALUES
     (1, 'Ginelle'),
     (2, 'Harvey'),
     (3, 'Kevin'),
     (4, 'Lara'),
     (5, 'Tyler');
+DELETE FROM ysr.media;
 INSERT INTO ysr.media (id, name, url) VALUES
     (1, 'Worm', 'https://parahumans.wordpress.com/category/stories-arcs-1-10/arc-1-gestation/1-01/'),
     (2, 'Skulduggery Pleasant', NULL),
@@ -68,6 +70,7 @@ INSERT INTO ysr.media (id, name, url) VALUES
     (59, 'Triangle Opportunity', 'https://www.inkitt.com/stories/horror/7465'),
     (60, 'Toni Stark', 'http://archiveofourown.org/series/347126'),
     (61, 'Cordyceps', 'http://archiveofourown.org/works/6178036/chapters/14154868');
+DELETE FROM ysr.rating;
 INSERT INTO ysr.rating (uid, mid, value) VALUES
     -- ginelle
     (1, 5, 9),
